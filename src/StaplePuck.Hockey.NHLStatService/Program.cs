@@ -10,7 +10,7 @@ namespace StaplePuck.Hockey.NHLStatService
 
             var request = new DateRequest
             {
-                GameDateId = "2019-04-11",
+                GameDateId = "2019-04-19",
                 SeasonId = "20182019" 
             };
 

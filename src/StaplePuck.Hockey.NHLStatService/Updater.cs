@@ -54,6 +54,10 @@ namespace StaplePuck.Hockey.NHLStatService
 
             var client = serviceProvider.GetService<IStaplePuckClient>();
             var result = client.UpdateAsync("updateGameDateStats", gameDate).Result;
+            if (!result.Success)
+            {
+                Console.Error.WriteLine($"Failed to update stats. {result.Message}");
+            }
         }
     }
 }
