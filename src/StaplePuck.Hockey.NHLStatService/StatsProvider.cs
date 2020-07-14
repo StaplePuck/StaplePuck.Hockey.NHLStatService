@@ -132,6 +132,10 @@ namespace StaplePuck.Hockey.NHLStatService
                             shutout.Total++;
                         }
                     }
+                    if (game.decisions == null && game.status.IsOver)
+                    {
+                        Console.Out.WriteLine($"Warning game is over but no decisions. Date: {game.gameDate} {game.teams.away.team.name} at {game.teams.home.team.name}");
+                    }
                 }
             }
 
@@ -170,7 +174,7 @@ namespace StaplePuck.Hockey.NHLStatService
             return item;
         }
 
-        public async Task<List<TeamStateOnDate>> GetTeamsStatesAsync(string seasonId)
+        public async Task<List<TeamStateForSeason>> GetTeamsStatesAsync(string seasonId)
         {
             var url = string.Format("{0}/tournaments/playoffs?expand=round.series&season={1}&site=en_nhl", _settings.StatsUrlRoot, seasonId);
             var dateResult = await _client.GetAsync(url);
@@ -183,11 +187,12 @@ namespace StaplePuck.Hockey.NHLStatService
             var content = await dateResult.Content.ReadAsStringAsync();
             var value = JsonConvert.DeserializeObject<Data.TournamentResult>(content);
 
-            var list = new List<TeamStateOnDate>();
+            var list = new List<TeamStateForSeason>();
             foreach (var item in GetTeamStates(value))
             {
                 var team = new Team { ExternalId = item.Key };
-                var teamState = new TeamStateOnDate { Team = team, GameState = item.Value };
+                var season = new Season { ExternalId = seasonId };
+                var teamState = new TeamStateForSeason { Season = season, Team = team, GameState = item.Value };
                 list.Add(teamState);
             }
             return list;
