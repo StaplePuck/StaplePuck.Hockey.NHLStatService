@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  staplepuck.hockey.nhlstatservice:
+    image: 398055399259.dkr.ecr.us-east-1.amazonaws.com/staplepuckhockeynhlstatservice
+    build:
+      context: .
+      dockerfile: src/StaplePuck.Hockey.NHLStatService/Dockerfile
+    env_file:
+      - ./NHLStatService.env
