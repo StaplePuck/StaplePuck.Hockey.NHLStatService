@@ -10,6 +10,7 @@ using StaplePuck.Core.Auth;
 using StaplePuck.Core.Stats;
 using StaplePuck.Core.Client;
 using Microsoft.Extensions.Options;
+using StaplePuck.Hockey.NHLStatService.Data;
 
 namespace StaplePuck.Hockey.NHLStatService
 {
@@ -91,6 +92,71 @@ namespace StaplePuck.Hockey.NHLStatService
             return serviceProvider.GetService<Updater>();
         }
 
+        public async Task UpdateRequest(DateRequest request)
+        {
+            try
+            {
+                var gameDateId = request.GameDateId;
+                if (string.IsNullOrEmpty(gameDateId))
+                {
+                    gameDateId = DateTime.Now.ToGameDateId();
+                }
+
+                Console.Out.WriteLine($"Updating date: {gameDateId}");
+                var playerScores = _statsProvider.GetScoresForDateAsync(gameDateId).Result;
+
+                var season = new Season
+                {
+                    ExternalId = request.SeasonId
+                };
+                var gds = new GameDateSeason
+                {
+                    GameDateId = gameDateId,
+                    Season = season
+                };
+
+                var gameDate = new GameDate
+                {
+                    Id = gameDateId,
+                    PlayersStatsOnDate = playerScores
+                };
+
+                if (request.GetTeamStates)
+                {
+                    Console.Out.WriteLine("Getting team states");
+                    var teamStates = _statsProvider.GetTeamsStatesAsync(request.SeasonId).Result;
+                    var teamResult = _client.UpdateAsync("updateTeamStates", teamStates, "teamStates", "[TeamStateForSeasonInput]").Result;
+                    if (teamResult == null)
+                    {
+                        Console.Error.WriteLine("Null result");
+                    }
+                    else if (!teamResult.Success)
+                    {
+                        Console.Error.WriteLine($"Failed to update. Message {teamResult.Message}");
+                    }
+                    Console.Out.WriteLine("Done updating date");
+                }
+
+                gameDate.GameDateSeasons.Add(gds);
+
+                Console.Out.WriteLine("Updating team date");
+                var result = await _client.UpdateAsync("updateGameDateStats", gameDate);
+                if (result == null)
+                {
+                    Console.Error.WriteLine("Null result");
+                }
+                else if (!result.Success)
+                {
+                    Console.Error.WriteLine($"Failed to update. Message {result.Message}");
+                }
+                Console.Out.WriteLine("Done updating date");
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine($"Update failed. {e.Message}. {e.StackTrace}");
+            }
+        }
+
         public void Update()
         {
             bool done = false;
@@ -100,7 +166,7 @@ namespace StaplePuck.Hockey.NHLStatService
             {
                 try
                 {
-                    var gameDateId = DateExtensions.TodaysDateId();
+                    var gameDateId = StaplePuck.Core.DateExtensions.TodaysDateId();
 
                     Console.Out.WriteLine($"Updating date: {gameDateId}");
                     var playerScores = _statsProvider.GetScoresForDateAsync(gameDateId).Result;

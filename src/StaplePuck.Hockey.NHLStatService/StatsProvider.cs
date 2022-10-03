@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Microsoft.Extensions.Options;
 using StaplePuck.Core.Stats;
 using StaplePuck.Core;
+using System.Text.RegularExpressions;
 
 namespace StaplePuck.Hockey.NHLStatService
 {
@@ -25,7 +26,7 @@ namespace StaplePuck.Hockey.NHLStatService
         {
             //var playersResult = this.m_context.HockeyPlayers.ToListAsync();
             //https://statsapi.web.nhl.com/api/v1/schedule?startDate=2016-04-13&endDate=2016-04-13&expand=schedule.decisions,schedule.scoringplays&site=en_nhl&teamId=
-            var url = string.Format("{0}/schedule?startDate={1}&endDate={1}&expand=schedule.decisions,schedule.scoringplays,schedule.game.seriesSummary&site=en_nhl&teamId=", _settings.StatsUrlRoot, dateId);
+            var url = string.Format("{0}/schedule?startDate={1}&endDate={1}&expand=schedule.decisions,schedule.scoringplays,schedule.game.seriesSummary&site=en_nhl&teamId=&gameType=P", _settings.StatsUrlRoot, dateId);
             var dateResult = await _client.GetAsync(url);
 
             if (!dateResult.IsSuccessStatusCode)
@@ -84,16 +85,23 @@ namespace StaplePuck.Hockey.NHLStatService
                             }
                             else if (player.playerType == "Scorer")
                             {
-                                var goal = this.GetScoreItem(data, goalType);
-                                goal.Total++;
+                                if (play.about.periodType == Data.PeriodType.OVERTIME && play.about.periodTime == "00:00")
+                                {
+                                }
+                                else
+                                {
+                                    var goal = this.GetScoreItem(data, goalType);
+                                    goal.Total++;
+                                }
 
                                 if (play.result.strength.code == Data.StrengthCode.SHG)
                                 {
                                     var shorthanded = this.GetScoreItem(data, shorthandedType);
                                     shorthanded.Total++;
                                 }
-                                if (play.about.periodType == Data.PeriodType.OVERTIME)
+                                if (play.about.periodType == Data.PeriodType.OVERTIME && play.about.periodTime != "00:00")
                                 {
+                                    //not a shoot out goal in over time
                                     var overtimeGoal = this.GetScoreItem(data, overtimeGoalType);
                                     overtimeGoal.Total++;
                                 }
@@ -210,22 +218,25 @@ namespace StaplePuck.Hockey.NHLStatService
                         var teamA = series.matchupTeams[0];
                         var teamB = series.matchupTeams[1];
                         var gameTime = series.currentGame.seriesSummary.gameTime;
-                        UpdateTeam(teams, teamA, gameTime);
-                        UpdateTeam(teams, teamB, gameTime);
+                        UpdateTeam(teams, teamA, series.currentGame.seriesSummary, gameTime);
+                        UpdateTeam(teams, teamB, series.currentGame.seriesSummary, gameTime);
                     }
                 }
             }
             return teams;
         }
 
-        private void UpdateTeam(Dictionary<int, int> teams, Data.Matchupteam matchup, DateTime gameTime)
+        private void UpdateTeam(Dictionary<int, int> teams, Data.Matchupteam matchup, Data.Seriessummary seriesSummary, DateTime gameTime)
         {
             var teamId = matchup.team.id;
             teams[teamId] = 0;
 
-            if (matchup.seriesRecord.losses == 4)
+            if (seriesSummary.seriesStatus.Contains(" win "))
             {
-                teams[teamId] = -1;
+                if (matchup.seriesRecord.losses > matchup.seriesRecord.wins)
+                {
+                    teams[teamId] = -1;
+                }
             }
 
             if (gameTime.IsToday())

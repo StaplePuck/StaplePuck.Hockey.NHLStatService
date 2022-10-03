@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace StaplePuck.Hockey.NHLStatService.Data
@@ -32,7 +33,7 @@ namespace StaplePuck.Hockey.NHLStatService.Data
         {
             get
             {
-                return seriesStatus.Contains("4");
+                return seriesStatus.Contains(" win ");
             }
         }
 
@@ -157,6 +158,7 @@ namespace StaplePuck.Hockey.NHLStatService.Data
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public PeriodType periodType { get; set; }
+        public string periodTime { get; set; }
     }
 
     public enum PeriodType
