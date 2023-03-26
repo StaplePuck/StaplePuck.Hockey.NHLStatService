@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using StaplePuck.Core.Stats;
 using StaplePuck.Core;
 using System.Text.RegularExpressions;
+using static StaplePuck.Hockey.NHLStatService.Data.LiveResult;
 
 namespace StaplePuck.Hockey.NHLStatService
 {
@@ -22,11 +23,11 @@ namespace StaplePuck.Hockey.NHLStatService
             _settings = options.Value;
         }
 
-        public async Task<List<PlayerStatsOnDate>> GetScoresForDateAsync(string dateId)
+        public async Task<List<PlayerStatsOnDate>> GetScoresForDateAsync(string dateId, bool isPlayoffs)
         {
             //var playersResult = this.m_context.HockeyPlayers.ToListAsync();
             //https://statsapi.web.nhl.com/api/v1/schedule?startDate=2016-04-13&endDate=2016-04-13&expand=schedule.decisions,schedule.scoringplays&site=en_nhl&teamId=
-            var url = string.Format("{0}/schedule?startDate={1}&endDate={1}&expand=schedule.decisions,schedule.scoringplays,schedule.game.seriesSummary&site=en_nhl&teamId=&gameType=P", _settings.StatsUrlRoot, dateId);
+            var url = string.Format("{0}/api/v1/schedule?startDate={1}&endDate={1}&expand=schedule.decisions,schedule.scoringplays,schedule.game.seriesSummary&site=en_nhl", _settings.StatsUrlRoot, dateId);
             var dateResult = await _client.GetAsync(url);
 
             if (!dateResult.IsSuccessStatusCode)
@@ -42,6 +43,12 @@ namespace StaplePuck.Hockey.NHLStatService
             var gameWinningType = new ScoringType { Name = "Game Winning Goal" };
             var seriesClinchingType = new ScoringType { Name = "Series Clinching Goal" };
             var overtimeGoalType = new ScoringType { Name = "Overtime Goal" };
+            var shootoutGoalType = new ScoringType { Name = "Shootout Goal" };
+            var fightingMajorType = new ScoringType { Name = "Fighting Major" };
+            var saveType = new ScoringType { Name = "Save" };
+            var firstStarType = new ScoringType { Name = "1st Star" };
+            var secondStarType = new ScoringType { Name = "2nd Star" };
+            var thirdStarType = new ScoringType { Name = "3rd Star" };
 
             var content = await dateResult.Content.ReadAsStringAsync();
             var value = JsonConvert.DeserializeObject<Data.DateResult>(content);
@@ -51,6 +58,46 @@ namespace StaplePuck.Hockey.NHLStatService
             {
                 foreach (var game in date.games)
                 {
+                    if (!((isPlayoffs && game.gameType == "P") || (!isPlayoffs && game.gameType == "R")))
+                    {
+                        continue;
+                    }
+                    var liveResult = await _client.GetAsync($"{_settings.StatsUrlRoot}{game.link}");
+
+                    if (liveResult.IsSuccessStatusCode)
+                    {
+                        var liveContent = await liveResult.Content.ReadAsStringAsync();
+                        var liveData = JsonConvert.DeserializeObject<Data.LiveResult>(liveContent);
+
+                        // saves
+                        foreach (var goalie in liveData.liveData.boxscore.teams.home.players.Values.Where(x => x.stats?.goalieStats != null)
+                            .Union(liveData.liveData.boxscore.teams.away.players.Values.Where(x => x.stats?.goalieStats != null)))
+                        {
+                            if (goalie.stats.goalieStats.saves > 0)
+                            {
+                                var data = this.GetPlayerStat(list, date.date, goalie.person.id);
+                                var saves = this.GetScoreItem(data, saveType);
+                                saves.Total = goalie.stats.goalieStats.saves;
+                            }
+                        }
+
+                        // penalties
+                        foreach (var penality in liveData.liveData.plays.allPlays.Where(
+                            x => x.result?.eventTypeId == "PENALTY" && x.result?.secondaryType == "Fighting"))
+                        {
+                            foreach (var player in penality.players)
+                            {
+                                var data = this.GetPlayerStat(list, date.date, player.player.id);
+                                var fightings = this.GetScoreItem(data, fightingMajorType);
+                                fightings.Total++;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //log warning
+                    }
+
                     var gwgNumber = -1;
                     var winningTeam = string.Empty;
                     if (game.status.IsOver)
@@ -87,36 +134,39 @@ namespace StaplePuck.Hockey.NHLStatService
                             {
                                 if (play.about.periodType == Data.PeriodType.OVERTIME && play.about.periodTime == "00:00")
                                 {
+                                    //shoot out goal
+                                    var shootoutGoal = this.GetScoreItem(data, shootoutGoalType);
+                                    shootoutGoal.Total++;
                                 }
                                 else
                                 {
                                     var goal = this.GetScoreItem(data, goalType);
                                     goal.Total++;
-                                }
 
-                                if (play.result.strength.code == Data.StrengthCode.SHG)
-                                {
-                                    var shorthanded = this.GetScoreItem(data, shorthandedType);
-                                    shorthanded.Total++;
-                                }
-                                if (play.about.periodType == Data.PeriodType.OVERTIME && play.about.periodTime != "00:00")
-                                {
-                                    //not a shoot out goal in over time
-                                    var overtimeGoal = this.GetScoreItem(data, overtimeGoalType);
-                                    overtimeGoal.Total++;
-                                }
-
-                                if (winningTeam.Equals(play.team.name) && position == gwgNumber && game.seriesSummary != null)
-                                {
-                                    // Calculate if scg
-                                    if (game.seriesSummary.IsOver)
+                                    if (play.result.strength.code == Data.StrengthCode.SHG)
                                     {
-                                        var seriesClinch = this.GetScoreItem(data, seriesClinchingType);
-                                        seriesClinch.Total++;
+                                        var shorthanded = this.GetScoreItem(data, shorthandedType);
+                                        shorthanded.Total++;
                                     }
-                                    // GWG
-                                    var gameWinning = this.GetScoreItem(data, gameWinningType);
-                                    gameWinning.Total++;
+                                    if (play.about.periodType == Data.PeriodType.OVERTIME && play.about.periodTime != "00:00")
+                                    {
+                                        //not a shoot out goal in over time
+                                        var overtimeGoal = this.GetScoreItem(data, overtimeGoalType);
+                                        overtimeGoal.Total++;
+                                    }
+
+                                    if (winningTeam.Equals(play.team.name) && position == gwgNumber && game.seriesSummary != null)
+                                    {
+                                        // Calculate if scg
+                                        if (game.seriesSummary.IsOver)
+                                        {
+                                            var seriesClinch = this.GetScoreItem(data, seriesClinchingType);
+                                            seriesClinch.Total++;
+                                        }
+                                        // GWG
+                                        var gameWinning = this.GetScoreItem(data, gameWinningType);
+                                        gameWinning.Total++;
+                                    }
                                 }
                             }
                         }
@@ -139,6 +189,30 @@ namespace StaplePuck.Hockey.NHLStatService
                             var shutout = this.GetScoreItem(data, shutoutType);
                             shutout.Total++;
                         }
+                    }
+                    if (game?.decisions?.firstStar != null)
+                    {
+                        var playerId = game.decisions.firstStar.id;
+                        var data = this.GetPlayerStat(list, date.date, playerId);
+
+                        var firstStar = this.GetScoreItem(data, firstStarType);
+                        firstStar.Total++;
+                    }
+                    if (game?.decisions?.secondStar != null)
+                    {
+                        var playerId = game.decisions.secondStar.id;
+                        var data = this.GetPlayerStat(list, date.date, playerId);
+
+                        var secondStar = this.GetScoreItem(data, secondStarType);
+                        secondStar.Total++;
+                    }
+                    if (game?.decisions?.thirdStar != null)
+                    {
+                        var playerId = game.decisions.thirdStar.id;
+                        var data = this.GetPlayerStat(list, date.date, playerId);
+
+                        var thirdStar = this.GetScoreItem(data, thirdStarType);
+                        thirdStar.Total++;
                     }
                     if (game.decisions == null && game.status.IsOver)
                     {
@@ -182,28 +256,60 @@ namespace StaplePuck.Hockey.NHLStatService
             return item;
         }
 
-        public async Task<List<TeamStateForSeason>> GetTeamsStatesAsync(string seasonId)
+        public async Task<List<TeamStateForSeason>> GetTeamsStatesAsync(string seasonId, bool isPlayoffs)
         {
-            var url = string.Format("{0}/tournaments/playoffs?expand=round.series&season={1}&site=en_nhl", _settings.StatsUrlRoot, seasonId);
-            var dateResult = await _client.GetAsync(url);
-
-            if (!dateResult.IsSuccessStatusCode)
+            if (isPlayoffs)
             {
-                return null;
+                var url = string.Format("{0}/api/v1/tournaments/playoffs?expand=round.series&season={1}&site=en_nhl", _settings.StatsUrlRoot, seasonId);
+                var dateResult = await _client.GetAsync(url);
+
+                if (!dateResult.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+
+                var content = await dateResult.Content.ReadAsStringAsync();
+                var value = JsonConvert.DeserializeObject<Data.TournamentResult>(content);
+
+                var list = new List<TeamStateForSeason>();
+                foreach (var item in GetTeamStates(value))
+                {
+                    var team = new Team { ExternalId = item.Key };
+                    var season = new Season { ExternalId = seasonId, IsPlayoffs = isPlayoffs };
+                    var teamState = new TeamStateForSeason { Season = season, Team = team, GameState = item.Value };
+                    list.Add(teamState);
+                }
+                return list;
             }
-
-            var content = await dateResult.Content.ReadAsStringAsync();
-            var value = JsonConvert.DeserializeObject<Data.TournamentResult>(content);
-
-            var list = new List<TeamStateForSeason>();
-            foreach (var item in GetTeamStates(value))
+            else
             {
-                var team = new Team { ExternalId = item.Key };
-                var season = new Season { ExternalId = seasonId };
-                var teamState = new TeamStateForSeason { Season = season, Team = team, GameState = item.Value };
-                list.Add(teamState);
+                var url = string.Format("{0}/api/v1/standings?hydrate=team(nextSchedule(team))&season={1}&site=en_nhl", _settings.StatsUrlRoot, seasonId);
+                var dateResult = await _client.GetAsync(url);
+
+                if (!dateResult.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+
+                var content = await dateResult.Content.ReadAsStringAsync();
+                var value = JsonConvert.DeserializeObject<Data.StandingsResult>(content);
+
+                var list = new List<TeamStateForSeason>();
+                foreach (var item in value.records.SelectMany(x => x.teamRecords))
+                {
+                    var team = new Team { ExternalId = item.team.id };
+                    var season = new Season { ExternalId = seasonId, IsPlayoffs = isPlayoffs };
+                    var gameState = 0;
+                    var date = item.team?.nextSchedule?.dates?.FirstOrDefault();
+                    if (date != null && date.date.IsToday() && date.games.Any(x => x.gameType == "P"))
+                    {
+                        gameState = 1;
+                    }
+                    var teamState = new TeamStateForSeason { Season = season, Team = team, GameState = gameState };
+                    list.Add(teamState);
+                }
+                return list;
             }
-            return list;
         }
 
         public Dictionary<int, int> GetTeamStates(Data.TournamentResult result)

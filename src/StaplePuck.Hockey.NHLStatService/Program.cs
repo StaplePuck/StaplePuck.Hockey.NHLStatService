@@ -10,9 +10,12 @@ namespace StaplePuck.Hockey.NHLStatService
 
             var request = new DateRequest
             {
-                //GameDateId = "2020-08-03",
-                SeasonId = "20202021",
-                GetTeamStates = false
+                //GameDateId = "2022-02-18",
+                //GameDateId = "2022-09-25",
+                //GameDateId = "2022-10-07",
+                SeasonId = "20222023",
+                GetTeamStates = true,
+                IsPlayoffs = false
             };
 
             //Updater.UpdateDate(request);

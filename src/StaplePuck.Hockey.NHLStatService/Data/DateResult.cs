@@ -116,18 +116,14 @@ namespace StaplePuck.Hockey.NHLStatService.Data
 
     public class Decisions
     {
-        public Winner winner { get; set; }
-        public Loser loser { get; set; }
+        public PlayerDecision winner { get; set; }
+        public PlayerDecision loser { get; set; }
+        public PlayerDecision firstStar { get; set; }
+        public PlayerDecision secondStar { get; set; }
+        public PlayerDecision thirdStar { get; set; }
     }
 
-    public class Winner
-    {
-        public int id { get; set; }
-        public string fullName { get; set; }
-        public string link { get; set; }
-    }
-
-    public class Loser
+    public class PlayerDecision
     {
         public int id { get; set; }
         public string fullName { get; set; }
