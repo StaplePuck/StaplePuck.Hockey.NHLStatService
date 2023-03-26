@@ -10,6 +10,7 @@ namespace StaplePuck.Hockey.NHLStatService
         public string SeasonId { get; set; }
         public string GameDateId { get; set; }
         public bool GetTeamStates { get; set; }
+        public bool IsPlayoffs { get; set; }
 
         public static DateRequest Deserialize(string text)
         {
