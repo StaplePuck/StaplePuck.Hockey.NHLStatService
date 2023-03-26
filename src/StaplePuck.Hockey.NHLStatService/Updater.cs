@@ -11,6 +11,7 @@ using StaplePuck.Core.Stats;
 using StaplePuck.Core.Client;
 using Microsoft.Extensions.Options;
 using StaplePuck.Hockey.NHLStatService.Data;
+using StaplePuck.Hockey.NHLStatService.Request;
 
 namespace StaplePuck.Hockey.NHLStatService
 {
@@ -41,22 +42,26 @@ namespace StaplePuck.Hockey.NHLStatService
                 .AddStaplePuckClient(configuration)
                 .BuildServiceProvider();
 
-            var provider = serviceProvider.GetService<StatsProvider>();
+            var provider = serviceProvider.GetRequiredService<StatsProvider>();
             var playerScores = provider.GetScoresForDateAsync(request.GameDateId, request.IsPlayoffs).Result;
             //var teamStates = provider.GetTeamsStatesAsync(request.SeasonId).Result;
 
+            if (playerScores == null)
+            {
+                return;
+            }
 
-            var season = new Season
+            var season = new Request.Season
             {
                 ExternalId = request.SeasonId
             };
-            var gds = new GameDateSeason
+            var gds = new Request.GameDateSeason
             {
                 GameDateId = request.GameDateId,
                 Season = season
             };
 
-            var gameDate = new GameDate
+            var gameDate = new Request.GameDate
             {
                 Id = request.GameDateId,
                 PlayersStatsOnDate = playerScores,
@@ -66,7 +71,7 @@ namespace StaplePuck.Hockey.NHLStatService
             //gameDate.PlayersStatsOnDate = null;
             //gameDate.TeamsStateOnDate = null;
 
-            var client = serviceProvider.GetService<IStaplePuckClient>();
+            var client = serviceProvider.GetRequiredService<IStaplePuckClient>();
             var result = client.UpdateAsync("updateGameDateStats", gameDate).Result;
             if (!result.Success)
             {
@@ -89,7 +94,7 @@ namespace StaplePuck.Hockey.NHLStatService
                 .AddSingleton<Updater>()
                 .BuildServiceProvider();
 
-            return serviceProvider.GetService<Updater>();
+            return serviceProvider.GetRequiredService<Updater>();
         }
 
         public async Task UpdateRequest(DateRequest request)
@@ -104,19 +109,23 @@ namespace StaplePuck.Hockey.NHLStatService
 
                 Console.Out.WriteLine($"Updating date: {gameDateId}");
                 var playerScores = _statsProvider.GetScoresForDateAsync(gameDateId, request.IsPlayoffs).Result;
+                if (playerScores == null) 
+                { 
+                    return; 
+                }
 
-                var season = new Season
+                var season = new Request.Season
                 {
                     ExternalId = request.SeasonId,
                     IsPlayoffs = request.IsPlayoffs
                 };
-                var gds = new GameDateSeason
+                var gds = new Request.GameDateSeason
                 {
                     GameDateId = gameDateId,
                     Season = season
                 };
 
-                var gameDate = new GameDate
+                var gameDate = new Request.GameDate
                 {
                     Id = gameDateId,
                     PlayersStatsOnDate = playerScores
@@ -171,18 +180,22 @@ namespace StaplePuck.Hockey.NHLStatService
 
                     Console.Out.WriteLine($"Updating date: {gameDateId}");
                     var playerScores = _statsProvider.GetScoresForDateAsync(gameDateId, true).Result;
+                    if (playerScores == null)
+                    {
+                        continue;
+                    }
 
-                    var season = new Season
+                    var season = new Request.Season
                     {
                         ExternalId = _settings.SeasonId
                     };
-                    var gds = new GameDateSeason
+                    var gds = new Request.GameDateSeason
                     {
                         GameDateId = gameDateId,
                         Season = season
                     };
 
-                    var gameDate = new GameDate
+                    var gameDate = new Request.GameDate
                     {
                         Id = gameDateId,
                         PlayersStatsOnDate = playerScores
@@ -246,18 +259,22 @@ namespace StaplePuck.Hockey.NHLStatService
                 try
                 { 
                     var playerScores = _statsProvider.GetScoresForDateAsync(gameDateId, isPlayoffs).Result;
+                    if (playerScores == null) 
+                    {
+                        continue;
+                    }
 
-                    var season = new Season
+                    var season = new Request.Season
                     {
                         ExternalId = _settings.SeasonId
                     };
-                    var gds = new GameDateSeason
+                    var gds = new Request.GameDateSeason
                     {
                         GameDateId = gameDateId,
                         Season = season
                     };
 
-                    var gameDate = new GameDate
+                    var gameDate = new Request.GameDate
                     {
                         Id = gameDateId,
                         PlayersStatsOnDate = playerScores
