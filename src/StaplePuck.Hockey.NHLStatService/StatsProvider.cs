@@ -11,6 +11,7 @@ using StaplePuck.Core;
 using System.Text.RegularExpressions;
 using static StaplePuck.Hockey.NHLStatService.Data.LiveResult;
 using StaplePuck.Hockey.NHLStatService.Request;
+using Microsoft.Extensions.Logging;
 
 namespace StaplePuck.Hockey.NHLStatService
 {
@@ -18,10 +19,12 @@ namespace StaplePuck.Hockey.NHLStatService
     {
         private readonly Settings _settings;
         private readonly HttpClient _client = new HttpClient();
+        private readonly ILogger _logger;
 
-        public StatsProvider(IOptions<Settings> options)
+        public StatsProvider(IOptions<Settings> options, ILogger<StatsProvider> logger)
         {
             _settings = options.Value;
+            _logger = logger;
         }
 
         public async Task<List<Request.PlayerStatsOnDate>?> GetScoresForDateAsync(string dateId, bool isPlayoffs)
@@ -221,7 +224,7 @@ namespace StaplePuck.Hockey.NHLStatService
                     }
                     if (game!.decisions! == null && game!.status!.IsOver)
                     {
-                        Console.Out.WriteLine($"Warning game is over but no decisions. Date: {game.gameDate} {game!.teams!.away!.team!.name} at {game!.teams!.home!.team!.name}");
+                        _logger.LogWarning($"Warning game is over but no decisions. Date: {game.gameDate} {game!.teams!.away!.team!.name} at {game!.teams!.home!.team!.name}");
                     }
                 }
             }
