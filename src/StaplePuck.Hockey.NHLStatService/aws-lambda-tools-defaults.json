@@ -2,18 +2,7 @@
 {
     "region" : "us-east-1",
     "profile" : "default",
-    "configuration" : "Release",
-    "framework"     : "netcoreapp3.1",
-    "function-name" : "nhlstats",
-    "function-handler" : "StaplePuck.Hockey.NHLStatService::StaplePuck.Hockey.NHLStatService.LambdaEntryPoint::ProcessMessage",
-    "function-memory-size" : 256,
-    "function-role"        : "arn:aws:iam::398055399259:role/lambda_exec_nhlstats",
-    "function-timeout"     : 10,
-    "function-runtime"     : "dotnetcore3.1",
-    "tracing-mode"         : "PassThrough",
-    "function-description"  : "",
-    "package-type"          : "Zip",
-    "function-architecture" : "x86_64",
-    "dockerfile"            : "Dockerfile",
-    "image-tag"             : ""
+    "s3-bucket" : "staplepuckapi",
+    "template"  : "serverless.template",
+    "stack-name" : "staplepuck-nhlstats"
 }
