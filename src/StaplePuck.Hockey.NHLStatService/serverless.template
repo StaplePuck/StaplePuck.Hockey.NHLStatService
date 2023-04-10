@@ -1,0 +1,67 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Transform" : "AWS::Serverless-2016-10-31",
+  "Description" : "The serverless application for the StaplePuck NHL Stat Service",
+  "Parameters" : {
+    "Auth0Audience": {
+        "Type": "String"
+    },
+    "Auth0ClientId": {
+        "Type": "String"
+    },
+    "Auth0ClientSecret": {
+        "Type": "String"
+    },
+    "Auth0TokenUrl": {
+        "Type": "String"
+    },
+    "StaplePuckEndpoint": {
+        "Type": "String"
+    },
+    "SettingsStatsUrlRoot": {
+        "Type": "String"
+    }
+  },
+  "Resources" : {
+    "NHLStatsFunction" : {
+      "Type" : "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "StaplePuck.Hockey.NHLStatService::StaplePuck.Hockey.NHLStatService.LambdaEntryPoint::ProcessMessage",
+        "Runtime": "dotnet6",
+        "CodeUri": "",
+        "Description": "NHL Stats Service",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [ "AWSLambda_FullAccess" ],
+        "Environment": {
+            "Variables": {
+                "Auth0__Audience": { "Ref" : "Auth0Audience" },
+                "Auth0__ClientIdHOLD": { "Ref" : "Auth0ClientId" },
+                "Auth0__ClientSecret": { "Ref" : "Auth0ClientSecret" },
+                "Auth0__TokenUrl": { "Ref" : "Auth0TokenUrl" },
+                "StaplePuck__Endpoint": { "Ref" : "StaplePuckEndpoint" },
+                "Settings__StatsUrlRoot": { "Ref" : "SettingsStatsUrlRoot" }
+            }
+        },
+        "Events": {
+            "SQSEvent": {
+                "Type": "SQS",
+                "Properties": {
+                    "Queue": { "Fn::GetAtt": ["StatsQueue", "Arn"] }
+                }
+            }
+        }
+      }
+    },
+    "StatsQueue": {
+        "Type": "AWS::SQS::Queue"
+    }
+  },
+  "Outputs" : {
+    "StatsQueue" : {
+        "Description" : "The SQS Queue that is connected to the NHL Stats Service",
+        "Value" : { "Fn::GetAtt": ["StatsQueue", "Arn"] }
+    }
+  }
+}

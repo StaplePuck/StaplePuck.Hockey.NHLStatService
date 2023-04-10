@@ -6,8 +6,6 @@ namespace StaplePuck.Hockey.NHLStatService
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-
             var request = new DateRequest
             {
                 //GameDateId = "2022-02-18",
