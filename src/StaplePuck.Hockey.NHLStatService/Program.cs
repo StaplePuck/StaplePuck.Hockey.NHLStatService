@@ -6,19 +6,22 @@ namespace StaplePuck.Hockey.NHLStatService
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-
             var request = new DateRequest
             {
-                GameDateId = "2019-04-21",
-                SeasonId = "20182019" 
+                //GameDateId = "2022-02-18",
+                //GameDateId = "2022-09-25",
+                //GameDateId = "2022-10-07",
+                SeasonId = "20222023",
+                GetTeamStates = true,
+                IsPlayoffs = false
             };
 
             //Updater.UpdateDate(request);
 
 
             var updater = Updater.Init();
-            updater.Update();
+            //updater.Update();
+            updater.UpdateRequest(request).Wait();
             //updater.UpdateDateRange(new DateTime(2019, 4, 10), new DateTime(2019, 5, 6));
         }
     }
