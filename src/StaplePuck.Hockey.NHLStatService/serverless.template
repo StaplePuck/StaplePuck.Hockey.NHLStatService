@@ -43,25 +43,8 @@
                 "StaplePuck__Endpoint": { "Ref" : "StaplePuckEndpoint" },
                 "Settings__StatsUrlRoot": { "Ref" : "SettingsStatsUrlRoot" }
             }
-        },
-        "Events": {
-            "SQSEvent": {
-                "Type": "SQS",
-                "Properties": {
-                    "Queue": { "Fn::GetAtt": ["StatsQueue", "Arn"] }
-                }
-            }
         }
       }
-    },
-    "StatsQueue": {
-        "Type": "AWS::SQS::Queue"
-    }
-  },
-  "Outputs" : {
-    "StatsQueue" : {
-        "Description" : "The SQS Queue that is connected to the NHL Stats Service",
-        "Value" : { "Fn::GetAtt": ["StatsQueue", "Arn"] }
     }
   }
 }
