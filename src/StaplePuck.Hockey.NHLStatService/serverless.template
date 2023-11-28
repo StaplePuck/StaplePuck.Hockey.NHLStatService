@@ -34,7 +34,7 @@
         "CodeUri": "",
         "Description": "NHL Stats Service",
         "MemorySize": 256,
-        "Timeout": 30,
+        "Timeout": 300,
         "Role": null,
         "Policies": [ "AWSLambda_FullAccess" ],
         "Environment": {
