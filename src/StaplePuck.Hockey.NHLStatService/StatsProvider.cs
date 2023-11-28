@@ -12,26 +12,28 @@ using System.Text.RegularExpressions;
 using static StaplePuck.Hockey.NHLStatService.Data.LiveResult;
 using StaplePuck.Hockey.NHLStatService.Request;
 using Microsoft.Extensions.Logging;
+using StaplePuck.Hockey.NHLStatService.Scoring;
 
 namespace StaplePuck.Hockey.NHLStatService
 {
     public class StatsProvider
     {
         private readonly Settings _settings;
+        private readonly IEnumerable<IScoringParser> _parsers;
         private readonly HttpClient _client = new HttpClient();
         private readonly ILogger _logger;
 
-        public StatsProvider(IOptions<Settings> options, ILogger<StatsProvider> logger)
+        public StatsProvider(IOptions<Settings> options, IEnumerable<IScoringParser> scoringParsers, ILogger<StatsProvider> logger)
         {
             _settings = options.Value;
+            _parsers = scoringParsers;
             _logger = logger;
         }
 
         public async Task<List<Request.PlayerStatsOnDate>?> GetScoresForDateAsync(string dateId, bool isPlayoffs)
         {
-            //var playersResult = this.m_context.HockeyPlayers.ToListAsync();
-            //https://statsapi.web.nhl.com/api/v1/schedule?startDate=2016-04-13&endDate=2016-04-13&expand=schedule.decisions,schedule.scoringplays&site=en_nhl&teamId=
-            var url = string.Format("{0}/api/v1/schedule?startDate={1}&endDate={1}&expand=schedule.decisions,schedule.scoringplays,schedule.game.seriesSummary&site=en_nhl", _settings.StatsUrlRoot, dateId);
+            // get games
+            var url = $"{_settings.ApiUrlRoot}/v1/score/{dateId}";
             var dateResult = await _client.GetAsync(url);
 
             if (!dateResult.IsSuccessStatusCode)
@@ -39,193 +41,69 @@ namespace StaplePuck.Hockey.NHLStatService
                 return null;
             }
 
-            var goalType = new Request.ScoringType { Name = "Goal" };
-            var assistType = new Request.ScoringType { Name = "Assist" };
             var winType = new Request.ScoringType { Name = "Win" };
-            var shutoutType = new Request.ScoringType { Name = "Shutout" };
-            var shorthandedType = new Request.ScoringType { Name = "Shorthanded Goal" };
-            var gameWinningType = new Request.ScoringType { Name = "Game Winning Goal" };
-            var seriesClinchingType = new Request.ScoringType { Name = "Series Clinching Goal" };
-            var overtimeGoalType = new Request.ScoringType { Name = "Overtime Goal" };
             var shootoutGoalType = new Request.ScoringType { Name = "Shootout Goal" };
-            var fightingMajorType = new Request.ScoringType { Name = "Fighting Major" };
-            var saveType = new Request.ScoringType { Name = "Save" };
-            var firstStarType = new Request.ScoringType { Name = "1st Star" };
-            var secondStarType = new Request.ScoringType { Name = "2nd Star" };
-            var thirdStarType = new Request.ScoringType { Name = "3rd Star" };
 
             var content = await dateResult.Content.ReadAsStringAsync();
-            var value = JsonConvert.DeserializeObject<Data.DateResult>(content);
+            var value = JsonConvert.DeserializeObject<Data.ScoreDateResult>(content);
             if (value == null)
             {
                 return null;
             }
             var list = new List<Request.PlayerStatsOnDate>();
 
-            foreach (var date in value.dates)
+            foreach (var game in value.games)
             {
-                foreach (var game in date.games)
+                // 2 = regular   3== playoffs
+                if (!((isPlayoffs && game.gameType == 3) || (!isPlayoffs && game.gameType == 2)))
                 {
-                    if (!((isPlayoffs && game.gameType == "P") || (!isPlayoffs && game.gameType == "R")))
-                    {
-                        continue;
-                    }
-                    var liveResult = await _client.GetAsync($"{_settings.StatsUrlRoot}{game.link}");
+                    continue;
+                }
+                if (game.gameState == "FUT" || game.gameState == "PRE")
+                {
+                    continue;
+                }
+                var landingUrl = $"{_settings.ApiUrlRoot}/v1/gamecenter/{game.id}/landing";
+                var liveTask = _client.GetAsync(landingUrl);
 
-                    if (liveResult.IsSuccessStatusCode)
-                    {
-                        var liveContent = await liveResult.Content.ReadAsStringAsync();
-                        var liveData = JsonConvert.DeserializeObject<Data.LiveResult>(liveContent);
+                var boxScoreUrl = $"{_settings.ApiUrlRoot}/v1/gamecenter/{game.id}/boxscore";
+                var boxScoreTask = _client.GetAsync(boxScoreUrl);
 
-                        // saves
-                        foreach (var goalie in liveData!.liveData!.boxscore!.teams!.home!.players.Values.Where(x => x.stats?.goalieStats != null)
-                            .Union(liveData!.liveData!.boxscore!.teams!.away!.players.Values.Where(x => x.stats?.goalieStats != null)))
-                        {
-                            if (goalie!.stats!.goalieStats!.saves > 0)
-                            {
-                                var data = this.GetPlayerStat(list, date.date, goalie!.person!.id!);
-                                var saves = this.GetScoreItem(data, saveType);
-                                saves.Total = goalie.stats.goalieStats.saves;
-                            }
-                        }
+                await Task.WhenAll(liveTask, boxScoreTask);
 
-                        // penalties
-                        foreach (var penality in liveData!.liveData!.plays!.allPlays.Where(
-                            x => x.result?.eventTypeId == "PENALTY" && x.result?.secondaryType == "Fighting"))
-                        {
-                            foreach (var player in penality.players)
-                            {
-                                var data = this.GetPlayerStat(list, date.date, player!.player!.id!);
-                                var fightings = this.GetScoreItem(data, fightingMajorType);
-                                fightings.Total++;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //log warning
-                    }
+                if (!liveTask.Result.IsSuccessStatusCode || !boxScoreTask.Result.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning($"Failed to get game data {game.id}");
+                    continue;
+                }
 
-                    var gwgNumber = -1;
-                    var winningTeam = string.Empty;
-                    if (game?.status?.IsOver ?? false && game?.teams?.away!.team != null && game?.teams?.home!.team != null)
-                    {
-                        // Determine GWG and Winner
-                        var awayScore = game!.teams!.away.score;
-                        var homeScore = game.teams.home.score;
-                        if (awayScore < homeScore)
-                        {
-                            gwgNumber = awayScore + 1;
-                            winningTeam = game!.teams!.home!.team!.name;
-                        }
-                        else
-                        {
-                            gwgNumber = homeScore + 1;
-                            winningTeam = game!.teams!.away!.team!.name;
-                        }
-                    }
+                var liveContentTask = liveTask.Result.Content.ReadAsStringAsync();
+                var boxScoreContentTask = boxScoreTask.Result.Content.ReadAsStringAsync();
+                await Task.WhenAll(liveContentTask, boxScoreContentTask);
 
-                    // Scores
-                    int position = 1;
-                    foreach (var play in game!.scoringPlays!)
-                    {
-                        var strength = play!.result!.strength;
-                        foreach (var player in play.players)
-                        {
-                            var data = this.GetPlayerStat(list, date.date, player!.player!.id);
-                            if (player.playerType == "Assist")
-                            {
-                                var score = this.GetScoreItem(data, assistType);
-                                score.Total++;
-                            }
-                            else if (player.playerType == "Scorer")
-                            {
-                                if (play!.about!.periodType == Data.PeriodType.OVERTIME && play.about.periodTime == "00:00")
-                                {
-                                    //shoot out goal
-                                    var shootoutGoal = this.GetScoreItem(data, shootoutGoalType);
-                                    shootoutGoal.Total++;
-                                }
-                                else
-                                {
-                                    var goal = this.GetScoreItem(data, goalType);
-                                    goal.Total++;
+                var liveData = JsonConvert.DeserializeObject<Data.GameCenterResult>(liveContentTask.Result);
+                var boxScoreData = JsonConvert.DeserializeObject<Data.BoxScoreResult>(boxScoreContentTask.Result);
 
-                                    if (play!.result!.strength!.code == Data.StrengthCode.SHG)
-                                    {
-                                        var shorthanded = this.GetScoreItem(data, shorthandedType);
-                                        shorthanded.Total++;
-                                    }
-                                    if (play.about.periodType == Data.PeriodType.OVERTIME && play.about.periodTime != "00:00")
-                                    {
-                                        //not a shoot out goal in over time
-                                        var overtimeGoal = this.GetScoreItem(data, overtimeGoalType);
-                                        overtimeGoal.Total++;
-                                    }
+                if (boxScoreData == null)
+                {
+                    _logger.LogWarning("No content for boxscore data");
+                    continue;
+                }
+                if (liveData == null)
+                {
+                    _logger.LogWarning("No content for live data");
+                    continue;
+                }
 
-                                    if (winningTeam.Equals(play!.team!.name) && position == gwgNumber && game.seriesSummary != null)
-                                    {
-                                        // Calculate if scg
-                                        if (game.seriesSummary.IsOver)
-                                        {
-                                            var seriesClinch = this.GetScoreItem(data, seriesClinchingType);
-                                            seriesClinch.Total++;
-                                        }
-                                        // GWG
-                                        var gameWinning = this.GetScoreItem(data, gameWinningType);
-                                        gameWinning.Total++;
-                                    }
-                                }
-                            }
-                        }
-                        if (winningTeam.Equals(play!.team!.name))
-                        {
-                            position++;
-                        }
-                    }
+                var gameSummary = string.Empty;
+                if (!string.IsNullOrEmpty(boxScoreData.boxscore.gameReports.gameSummary))
+                {
+                    gameSummary = await _client.GetStringAsync(boxScoreData.boxscore.gameReports.gameSummary);
+                }
 
-                    // goalie
-                    if (game?.decisions?.winner != null)
-                    {
-                        var goalieWinnerId = game.decisions.winner.id;
-                        var data = this.GetPlayerStat(list, date.date, goalieWinnerId);
-
-                        var win = this.GetScoreItem(data, winType);
-                        win.Total++;
-                        if (game!.teams!.LosingScore == 0)
-                        {
-                            var shutout = this.GetScoreItem(data, shutoutType);
-                            shutout.Total++;
-                        }
-                    }
-                    if (game?.decisions?.firstStar != null)
-                    {
-                        var playerId = game.decisions.firstStar.id;
-                        var data = this.GetPlayerStat(list, date.date, playerId);
-
-                        var firstStar = this.GetScoreItem(data, firstStarType);
-                        firstStar.Total++;
-                    }
-                    if (game?.decisions?.secondStar != null)
-                    {
-                        var playerId = game.decisions.secondStar.id;
-                        var data = this.GetPlayerStat(list, date.date, playerId);
-
-                        var secondStar = this.GetScoreItem(data, secondStarType);
-                        secondStar.Total++;
-                    }
-                    if (game?.decisions?.thirdStar != null)
-                    {
-                        var playerId = game.decisions.thirdStar.id;
-                        var data = this.GetPlayerStat(list, date.date, playerId);
-
-                        var thirdStar = this.GetScoreItem(data, thirdStarType);
-                        thirdStar.Total++;
-                    }
-                    if (game!.decisions! == null && game!.status!.IsOver)
-                    {
-                        _logger.LogWarning($"Warning game is over but no decisions. Date: {game.gameDate} {game!.teams!.away!.team!.name} at {game!.teams!.home!.team!.name}");
-                    }
+                foreach (var parser in _parsers)
+                {
+                    parser.Parse(list, liveData, boxScoreData, gameSummary);
                 }
             }
 
