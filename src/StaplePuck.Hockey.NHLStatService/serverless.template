@@ -2,24 +2,27 @@
   "AWSTemplateFormatVersion" : "2010-09-09",
   "Transform" : "AWS::Serverless-2016-10-31",
   "Description" : "The serverless application for the StaplePuck NHL Stat Service",
-  "Parameters" : {
+  "Parameters": {
     "Auth0Audience": {
-        "Type": "String"
+      "Type": "String"
     },
     "Auth0ClientId": {
-        "Type": "String"
+      "Type": "String"
     },
     "Auth0ClientSecret": {
-        "Type": "String"
+      "Type": "String"
     },
     "Auth0TokenUrl": {
-        "Type": "String"
+      "Type": "String"
     },
     "StaplePuckEndpoint": {
-        "Type": "String"
+      "Type": "String"
+    },
+    "SettingsApiUrlRoot": {
+      "Type": "String"
     },
     "SettingsStatsUrlRoot": {
-        "Type": "String"
+      "Type": "String"
     }
   },
   "Resources" : {
@@ -35,14 +38,15 @@
         "Role": null,
         "Policies": [ "AWSLambda_FullAccess" ],
         "Environment": {
-            "Variables": {
-                "Auth0__Audience": { "Ref" : "Auth0Audience" },
-                "Auth0__ClientIdHOLD": { "Ref" : "Auth0ClientId" },
-                "Auth0__ClientSecret": { "Ref" : "Auth0ClientSecret" },
-                "Auth0__TokenUrl": { "Ref" : "Auth0TokenUrl" },
-                "StaplePuck__Endpoint": { "Ref" : "StaplePuckEndpoint" },
-                "Settings__StatsUrlRoot": { "Ref" : "SettingsStatsUrlRoot" }
-            }
+          "Variables": {
+            "Auth0__Audience": { "Ref": "Auth0Audience" },
+            "Auth0__ClientIdHOLD": { "Ref": "Auth0ClientId" },
+            "Auth0__ClientSecret": { "Ref": "Auth0ClientSecret" },
+            "Auth0__TokenUrl": { "Ref": "Auth0TokenUrl" },
+            "StaplePuck__Endpoint": { "Ref": "StaplePuckEndpoint" },
+            "Settings__ApiUrlRoot": { "Ref": "SettingsApiUrlRoot" },
+            "Settings__StatsUrlRoot": { "Ref": "SettingsStatsUrlRoot" }
+          }
         }
       }
     }

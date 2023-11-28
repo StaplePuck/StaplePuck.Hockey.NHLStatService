@@ -14,6 +14,7 @@ using StaplePuck.Hockey.NHLStatService.Data;
 using StaplePuck.Hockey.NHLStatService.Request;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using StaplePuck.Hockey.NHLStatService.Scoring;
 
 namespace StaplePuck.Hockey.NHLStatService
 {
@@ -97,7 +98,19 @@ namespace StaplePuck.Hockey.NHLStatService
                         .AddSingleton<StatsProvider>()
                         .AddAuth0Client(configuration)
                         .AddStaplePuckClient(configuration)
-                        .AddSingleton<Updater>();
+                        .AddSingleton<Updater>()
+                        
+                        .AddSingleton<IScoringParser, AssistParser>()
+                        .AddSingleton<IScoringParser, FightingParser>()
+                        .AddSingleton<IScoringParser, GoalDecisionParser>()
+                        .AddSingleton<IScoringParser, GoalParser>()
+                        .AddSingleton<IScoringParser, OvertimeGoalParser>()
+                        .AddSingleton<IScoringParser, SaveParser>()
+                        .AddSingleton<IScoringParser, ShootoutGoals>()
+                        .AddSingleton<IScoringParser, ShorthandedGoalParser>()
+                        .AddSingleton<IScoringParser, ShutoutParser>()
+                        .AddSingleton<IScoringParser, ThreeStarParser>()
+                        .AddSingleton<IScoringParser, WinParser>();
                 })
                 .AddNLog()
                 .Build();
