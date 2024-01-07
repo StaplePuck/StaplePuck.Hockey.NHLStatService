@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -82,27 +83,33 @@ namespace StaplePuck.Hockey.NHLStatService.Data
             public string situationCode { get; set; } = string.Empty;
             public string strength { get; set; } = string.Empty;
             public int playerId { get; set; }
-            public string firstName { get; set; } = string.Empty;
-            public string lastName { get; set; } = string.Empty;
-            public string name { get; set; } = string.Empty;
-            public string teamAbbrev { get; set; } = string.Empty;
+            public Name firstName { get; set; } = new Name();
+            public Name lastName { get; set; } = new Name();
+            public Name name { get; set; } = new Name();
+            public Name teamAbbrev { get; set; } = new Name();
             public string headshot { get; set; } = string.Empty;
             public long highlightClip { get; set; }
             public int goalsToDate { get; set; }
             public int awayScore { get; set; }
             public int homeScore { get; set; }
-            public string leadingTeamAbbrev { get; set; } = string.Empty;
+            public Name leadingTeamAbbrev { get; set; } = new Name();
             public string timeInPeriod { get; set; } = string.Empty;
             public string shotType { get; set; } = string.Empty;
             public string goalModifier { get; set; } = string.Empty;
             public Assist[] assists { get; set; } = new Assist[0];
         }
 
+        public class Name
+        {
+            [JsonProperty(PropertyName = "default")]
+            public string _default { get; set; } = string.Empty;
+        }
+
         public class Assist
         {
             public int playerId { get; set; }
-            public string firstName { get; set; } = string.Empty;
-            public string lastName { get; set; } = string.Empty;
+            public Name firstName { get; set; } = new Name();
+            public Name lastName { get; set; } = new Name();
             public int assistsToDate { get; set; }
         }
 

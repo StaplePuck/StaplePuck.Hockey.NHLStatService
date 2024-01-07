@@ -25,7 +25,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
             {
                 gwgNumber = awayScore + 1;
 
-                var gwg = gameCenter.summary.scoring.SelectMany(x => x.goals).FirstOrDefault(x => x.teamAbbrev == boxScore.homeTeam.abbrev && x.homeScore == gwgNumber);
+                var gwg = gameCenter.summary.scoring.SelectMany(x => x.goals).FirstOrDefault(x => x.teamAbbrev._default == boxScore.homeTeam.abbrev && x.homeScore == gwgNumber);
                 if (gwg != null)
                 {
                     gwgPlayerId = gwg.playerId;
@@ -35,7 +35,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
             {
                 gwgNumber = homeScore + 1;
 
-                var gwg = gameCenter.summary.scoring.SelectMany(x => x.goals).FirstOrDefault(x => x.teamAbbrev == boxScore.awayTeam.abbrev && x.awayScore == gwgNumber);
+                var gwg = gameCenter.summary.scoring.SelectMany(x => x.goals).FirstOrDefault(x => x.teamAbbrev._default == boxScore.awayTeam.abbrev && x.awayScore == gwgNumber);
                 if (gwg != null)
                 {
                     gwgPlayerId = gwg.playerId;
