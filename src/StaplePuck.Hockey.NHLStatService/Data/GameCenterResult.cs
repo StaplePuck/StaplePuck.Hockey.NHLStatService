@@ -42,8 +42,23 @@ namespace StaplePuck.Hockey.NHLStatService.Data
             public Shotsbyperiod[] shotsByPeriod { get; set; } = new Shotsbyperiod[0];
             public Penalty[] penalties { get; set; } = new Penalty[0];
             public SeasonSeries[] seasonSeries { get; set; } = new SeasonSeries[0];
+            public SeasonSeriesWins seasonSeriesWins {  get; set; }  = new SeasonSeriesWins();
+            public Gamereports gameReports { get; set; } = new Gamereports();
         }
 
+        public class Gamereports
+        {
+            public string gameSummary { get; set; } = string.Empty;
+            public string eventSummary { get; set; } = string.Empty;
+            public string playByPlay { get; set; } = string.Empty;
+            public string faceoffSummary { get; set; } = string.Empty;
+            public string faceoffComparison { get; set; } = string.Empty;
+            public string rosters { get; set; } = string.Empty;
+            public string shotSummary { get; set; } = string.Empty;
+            public string shiftChart { get; set; } = string.Empty;
+            public string toiAway { get; set; } = string.Empty;
+            public string toiHome { get; set; } = string.Empty;
+        }
 
         public class Linescore
         {
@@ -59,7 +74,6 @@ namespace StaplePuck.Hockey.NHLStatService.Data
 
         public class Byperiod
         {
-            public int period { get; set; }
             public Perioddescriptor periodDescriptor { get; set; } = new Perioddescriptor();
             public int away { get; set; }
             public int home { get; set; }
@@ -73,7 +87,6 @@ namespace StaplePuck.Hockey.NHLStatService.Data
 
         public class Scoring
         {
-            public int period { get; set; }
             public Perioddescriptor periodDescriptor { get; set; } = new Perioddescriptor();
             public Goal[] goals { get; set; } = new Goal[0];
         }
@@ -150,7 +163,6 @@ namespace StaplePuck.Hockey.NHLStatService.Data
 
         public class Shotsbyperiod
         {
-            public int period { get; set; }
             public Perioddescriptor periodDescriptor { get; set; } = new Perioddescriptor();
             public int away { get; set; }
             public int home { get; set; }
@@ -158,7 +170,6 @@ namespace StaplePuck.Hockey.NHLStatService.Data
 
         public class Penalty
         {
-            public int period { get; set; }
             public Perioddescriptor periodDescriptor { get; set; } = new Perioddescriptor();
             public Penalty1[] penalties { get; set; } = new Penalty1[0];
         }
@@ -187,6 +198,11 @@ namespace StaplePuck.Hockey.NHLStatService.Data
             public int period { get; set; }
         }
 
+        public class SeasonSeriesWins
+        {
+            public int awayTeamWins { get; set; }
+            public int homeTeamWins { get; set; }
+        }
         //public class Awayteam2
         //{
         //    public int id { get; set; }

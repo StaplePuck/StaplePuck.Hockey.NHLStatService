@@ -12,7 +12,7 @@ namespace StaplePuck.Hockey.NHLStatService
                 //GameDateId = "2022-02-18",
                 //GameDateId = "2022-09-25",
                 //GameDateId = "2023-11-06",
-                GameDateId = "2023-11-27",
+                GameDateId = "2024-01-06",
                 SeasonId = "20232024",
                 GetTeamStates = false,
                 IsPlayoffs = false

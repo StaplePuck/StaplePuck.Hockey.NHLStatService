@@ -25,7 +25,8 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
             {
                 gwgNumber = awayScore + 1;
 
-                var gwg = gameCenter.summary.scoring.SelectMany(x => x.goals).FirstOrDefault(x => x.teamAbbrev._default == boxScore.homeTeam.abbrev && x.homeScore == gwgNumber);
+                var gwg = gameCenter.summary.scoring.Where(x => x.periodDescriptor.periodType != "SO")
+                    .SelectMany(x => x.goals).FirstOrDefault(x => x.teamAbbrev._default == boxScore.homeTeam.abbrev && x.homeScore == gwgNumber);
                 if (gwg != null)
                 {
                     gwgPlayerId = gwg.playerId;
@@ -35,7 +36,8 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
             {
                 gwgNumber = homeScore + 1;
 
-                var gwg = gameCenter.summary.scoring.SelectMany(x => x.goals).FirstOrDefault(x => x.teamAbbrev._default == boxScore.awayTeam.abbrev && x.awayScore == gwgNumber);
+                var gwg = gameCenter.summary.scoring.Where(x => x.periodDescriptor.periodType != "SO")
+                    .SelectMany(x => x.goals).FirstOrDefault(x => x.teamAbbrev._default == boxScore.awayTeam.abbrev && x.awayScore == gwgNumber);
                 if (gwg != null)
                 {
                     gwgPlayerId = gwg.playerId;
@@ -49,8 +51,12 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
                 var stat = this.GetScoreItem(data, gameWinningType);
                 stat.Total = 1;
 
-                // TODO: SCG.. don't have enough data right now
-                //gameCenter.summary.seasonSeries
+                if (gameCenter.gameType == 3 && (gameCenter.summary.seasonSeriesWins.awayTeamWins == 4 || gameCenter.summary.seasonSeriesWins.homeTeamWins == 4))
+                {
+                    // TODO: SCG.. don't have enough data right now
+                    var scgStat = this.GetScoreItem(data, seriesClinchingType);
+                    scgStat.Total = 1;
+                }
             }
         }
     }

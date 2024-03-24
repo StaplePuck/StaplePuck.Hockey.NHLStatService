@@ -15,7 +15,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
         {
             var overtimeGoalType = new Request.ScoringType { Name = "Overtime Goal" };
 
-            foreach (var goal in gameCenter.summary.scoring.Where(x => x.period > 3).SelectMany(x => x.goals)) 
+            foreach (var goal in gameCenter.summary.scoring.Where(x => x.periodDescriptor.periodType == "OT").SelectMany(x => x.goals)) 
             {
                 var data = this.GetPlayerStat(list, gameCenter.gameDate, goal.playerId);
                 var otg = this.GetScoreItem(data, overtimeGoalType);
