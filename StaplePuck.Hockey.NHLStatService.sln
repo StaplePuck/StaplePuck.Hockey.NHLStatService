@@ -5,6 +5,12 @@ VisualStudioVersion = 17.5.33502.453
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StaplePuck.Hockey.NHLStatService", "src\StaplePuck.Hockey.NHLStatService\StaplePuck.Hockey.NHLStatService.csproj", "{A9D9CFF1-DCB6-40CC-8D3C-81041BE38FE1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{612BE4A8-4CA3-4434-813C-B08C0A1F7B1F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{EFCE2270-1B45-46C3-9B1A-B5A01B308C48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StaplePuck.Hockey.NHLStatService.Tests", "test\StaplePuck.Hockey.NHLStatService.Tests\StaplePuck.Hockey.NHLStatService.Tests.csproj", "{E7F26D88-AF5B-4648-81C8-742CDD241A5F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +21,17 @@ Global
 		{A9D9CFF1-DCB6-40CC-8D3C-81041BE38FE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9D9CFF1-DCB6-40CC-8D3C-81041BE38FE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9D9CFF1-DCB6-40CC-8D3C-81041BE38FE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7F26D88-AF5B-4648-81C8-742CDD241A5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7F26D88-AF5B-4648-81C8-742CDD241A5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7F26D88-AF5B-4648-81C8-742CDD241A5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7F26D88-AF5B-4648-81C8-742CDD241A5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A9D9CFF1-DCB6-40CC-8D3C-81041BE38FE1} = {612BE4A8-4CA3-4434-813C-B08C0A1F7B1F}
+		{E7F26D88-AF5B-4648-81C8-742CDD241A5F} = {EFCE2270-1B45-46C3-9B1A-B5A01B308C48}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {91FA9987-8E6B-469A-B82A-C2069130482D}

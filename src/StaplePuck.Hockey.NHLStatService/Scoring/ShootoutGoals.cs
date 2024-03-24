@@ -19,7 +19,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
             {
                 var data = this.GetPlayerStat(list, gameCenter.gameDate, goal.playerId);
                 var saves = this.GetScoreItem(data, shootoutGoalType);
-                saves.Total = 1;
+                saves.Total++;
             }
         }
     }

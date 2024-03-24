@@ -16,8 +16,8 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
         {
             var saveType = new ScoringType { Name = "Save" };
 
-            foreach (var goalie in boxScore.boxscore.playerByGameStats.homeTeam.goalies
-                   .Union(boxScore.boxscore.playerByGameStats.awayTeam.goalies))
+            foreach (var goalie in boxScore.playerByGameStats.homeTeam.goalies
+                   .Union(boxScore.playerByGameStats.awayTeam.goalies))
             {
                 var shotSplit = goalie.saveShotsAgainst.Split("/");
                 if (shotSplit.Length == 2 && shotSplit[0] != "0")

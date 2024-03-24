@@ -46,8 +46,8 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
                 }
 
                 var data = this.GetPlayerStat(list, gameCenter.gameDate, playerId.Value);
-                var fightings = this.GetScoreItem(data, winType);
-                fightings.Total++;
+                var wins = this.GetScoreItem(data, winType);
+                wins.Total++;
             }
             else
             {
