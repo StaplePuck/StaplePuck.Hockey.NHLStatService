@@ -40,7 +40,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
 
         protected IEnumerable<BoxScoreResult.PlayerStats> GetAllPlayerStats(BoxScoreResult boxScoreResult)
         {
-            var gameStats = boxScoreResult.boxscore.playerByGameStats;
+            var gameStats = boxScoreResult.playerByGameStats;
             var playerStatsList = new List<BoxScoreResult.PlayerStats>();
             playerStatsList.AddRange(gameStats.awayTeam.goalies);
             playerStatsList.AddRange(gameStats.awayTeam.defense);
@@ -57,11 +57,11 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
             BoxScoreResult.TeamPlayers teamPlayers;
             if (boxScoreResult.awayTeam.abbrev == teamAbbrev)
             {
-                teamPlayers = boxScoreResult.boxscore.playerByGameStats.awayTeam;
+                teamPlayers = boxScoreResult.playerByGameStats.awayTeam;
             }
             else if (boxScoreResult.homeTeam.abbrev == teamAbbrev)
             {
-                teamPlayers = boxScoreResult.boxscore.playerByGameStats.homeTeam;
+                teamPlayers = boxScoreResult.playerByGameStats.homeTeam;
             }
             else
             {

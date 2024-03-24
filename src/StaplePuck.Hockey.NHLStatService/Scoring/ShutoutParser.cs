@@ -21,7 +21,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
             var shutoutType = new ScoringType { Name = "Shutout" };
             if (boxScore.awayTeam.score == 0)
             {
-                foreach (var goalie in boxScore.boxscore.playerByGameStats.homeTeam.goalies)
+                foreach (var goalie in boxScore.playerByGameStats.homeTeam.goalies)
                 {
                     if (goalie.toi != "00:00")
                     {
@@ -34,7 +34,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
 
             if (boxScore.homeTeam.score == 0) 
             {
-                foreach (var goalie in boxScore.boxscore.playerByGameStats.awayTeam.goalies)
+                foreach (var goalie in boxScore.playerByGameStats.awayTeam.goalies)
                 {
                     if (goalie.toi != "00:00")
                     {

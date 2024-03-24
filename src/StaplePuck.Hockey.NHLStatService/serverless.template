@@ -30,7 +30,7 @@
       "Type" : "AWS::Serverless::Function",
       "Properties": {
         "Handler": "StaplePuck.Hockey.NHLStatService::StaplePuck.Hockey.NHLStatService.LambdaEntryPoint::ProcessMessage",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": "",
         "Description": "NHL Stats Service",
         "MemorySize": 256,

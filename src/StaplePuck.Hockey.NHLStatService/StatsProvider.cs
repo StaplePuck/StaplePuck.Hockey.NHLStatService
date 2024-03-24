@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Net.Http;
-using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using StaplePuck.Core.Stats;
+using Newtonsoft.Json;
 using StaplePuck.Core;
-using System.Text.RegularExpressions;
-using static StaplePuck.Hockey.NHLStatService.Data.LiveResult;
-using StaplePuck.Hockey.NHLStatService.Request;
-using Microsoft.Extensions.Logging;
 using StaplePuck.Hockey.NHLStatService.Scoring;
 
 namespace StaplePuck.Hockey.NHLStatService
@@ -96,9 +86,9 @@ namespace StaplePuck.Hockey.NHLStatService
                 }
 
                 var gameSummary = string.Empty;
-                if (!string.IsNullOrEmpty(boxScoreData.boxscore.gameReports.gameSummary))
+                if (!string.IsNullOrEmpty(boxScoreData.summary.gameReports.gameSummary))
                 {
-                    gameSummary = await _client.GetStringAsync(boxScoreData.boxscore.gameReports.gameSummary);
+                    gameSummary = await _client.GetStringAsync(boxScoreData.summary.gameReports.gameSummary);
                 }
 
                 foreach (var parser in _parsers)
