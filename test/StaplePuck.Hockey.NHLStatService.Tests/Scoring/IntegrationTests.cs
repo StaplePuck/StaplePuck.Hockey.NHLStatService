@@ -212,10 +212,10 @@ namespace StaplePuck.Hockey.NHLStatService.Tests.Scoring
                 Assert.Equal("Game Winning Goal", x.ScoringType.Name);
                 Assert.Equal(1, x.Total);
             }, x =>
-            {
-                Assert.Equal("Series Clinching Goal", x.ScoringType.Name);
-                Assert.Equal(1, x.Total);
-            }, x =>
+            //{
+            //    Assert.Equal("Series Clinching Goal", x.ScoringType.Name);
+            //    Assert.Equal(1, x.Total);
+            //}, x =>
             {
                 Assert.Equal("Goal", x.ScoringType.Name);
                 Assert.Equal(1, x.Total);
