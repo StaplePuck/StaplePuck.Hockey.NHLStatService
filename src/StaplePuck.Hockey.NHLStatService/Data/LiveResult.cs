@@ -142,7 +142,6 @@ namespace StaplePuck.Hockey.NHLStatService.Data
             public Plays? plays { get; set; }
             public Linescore? linescore { get; set; }
             public Boxscore? boxscore { get; set; }
-            public Decisions? decisions { get; set; }
         }
 
         public class Plays
@@ -442,15 +441,6 @@ namespace StaplePuck.Hockey.NHLStatService.Data
             public int id { get; set; }
             public string fullName { get; set; } = string.Empty;
             public string link { get; set; } = string.Empty;
-        }
-
-        public class Decisions
-        {
-            public PlayerDecision? winner { get; set; }
-            public PlayerDecision? loser { get; set; }
-            public PlayerDecision? firstStar { get; set; }
-            public PlayerDecision? secondStar { get; set; }
-            public PlayerDecision? thirdStar { get; set; }
         }
     }
 }

@@ -54,8 +54,8 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
                 if (gameCenter.gameType == 3 && (gameCenter.summary.seasonSeriesWins.awayTeamWins == 4 || gameCenter.summary.seasonSeriesWins.homeTeamWins == 4))
                 {
                     // TODO: SCG.. don't have enough data right now
-                    var scgStat = this.GetScoreItem(data, seriesClinchingType);
-                    scgStat.Total = 1;
+                    //var scgStat = this.GetScoreItem(data, seriesClinchingType);
+                    //scgStat.Total = 1;
                 }
             }
         }

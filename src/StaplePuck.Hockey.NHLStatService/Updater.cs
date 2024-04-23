@@ -156,7 +156,7 @@ namespace StaplePuck.Hockey.NHLStatService
                 if (request.GetTeamStates)
                 {
                     _logger.LogInformation("Getting team states");
-                    var teamStates = _statsProvider.GetTeamsStatesAsync(request.SeasonId, request.IsPlayoffs).Result;
+                    var teamStates = _statsProvider.GetTeamsStatesAsync(request.SeasonId, request.GameDateId, request.IsPlayoffs).Result;
                     var teamResult = _client.UpdateAsync("updateTeamStates", teamStates, "teamStates", "[TeamStateForSeasonInput]").Result;
                     if (teamResult == null)
                     {
@@ -226,7 +226,7 @@ namespace StaplePuck.Hockey.NHLStatService
                     if (gameDateId != previousDateId)
                     {
                         _logger.LogInformation("Getting team states");
-                        var teamStates = _statsProvider.GetTeamsStatesAsync(_settings.SeasonId, true).Result;
+                        var teamStates = _statsProvider.GetTeamsStatesAsync(_settings.SeasonId, gameDateId, true).Result;
                         var teamResult = _client.UpdateAsync("updateTeamStates", teamStates, "teamStates", "[TeamStateForSeasonInput]").Result;
                         if (teamResult == null)
                         {
