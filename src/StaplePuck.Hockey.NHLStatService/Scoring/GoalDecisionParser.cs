@@ -5,7 +5,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
 {
     public class GoalDecisionParser : ScoringParser
     {
-        public override void Parse(List<PlayerStatsOnDate> list, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
+        public override void Parse(List<PlayerStatsOnDate> list, ScoreDateResult.Game game, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
         {
             var gameWinningType = new ScoringType { Name = "Game Winning Goal" };
             var seriesClinchingType = new ScoringType { Name = "Series Clinching Goal" };
@@ -51,11 +51,11 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
                 var stat = this.GetScoreItem(data, gameWinningType);
                 stat.Total = 1;
 
-                if (gameCenter.gameType == 3 && (gameCenter.summary.seasonSeriesWins.awayTeamWins == 4 || gameCenter.summary.seasonSeriesWins.homeTeamWins == 4))
+                if (gameCenter.gameType == 3 && (game.seriesStatus.neededToWin == game.seriesStatus.topSeedWins || game.seriesStatus.neededToWin == game.seriesStatus.bottomSeedWins))
                 {
                     // TODO: SCG.. don't have enough data right now
-                    //var scgStat = this.GetScoreItem(data, seriesClinchingType);
-                    //scgStat.Total = 1;
+                    var scgStat = this.GetScoreItem(data, seriesClinchingType);
+                    scgStat.Total = 1;
                 }
             }
         }

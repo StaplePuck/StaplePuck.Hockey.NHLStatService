@@ -5,7 +5,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
 {
     public class FightingParser : ScoringParser
     {
-        public override void Parse(List<PlayerStatsOnDate> list, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
+        public override void Parse(List<PlayerStatsOnDate> list, ScoreDateResult.Game game, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
         {
             var fightingMajorType = new Request.ScoringType { Name = "Fighting Major" };
 

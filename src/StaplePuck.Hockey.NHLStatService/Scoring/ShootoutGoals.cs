@@ -11,7 +11,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
 {
     public class ShootoutGoals : ScoringParser
     {
-        public override void Parse(List<Request.PlayerStatsOnDate> list, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
+        public override void Parse(List<Request.PlayerStatsOnDate> list, ScoreDateResult.Game game, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
         {
             var shootoutGoalType = new Request.ScoringType { Name = "Shootout Goal" };
 

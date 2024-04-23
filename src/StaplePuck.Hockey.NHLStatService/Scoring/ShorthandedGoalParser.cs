@@ -4,7 +4,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
 {
     public class ShorthandedGoalParser : ScoringParser
     {
-        public override void Parse(List<Request.PlayerStatsOnDate> list, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
+        public override void Parse(List<Request.PlayerStatsOnDate> list, ScoreDateResult.Game game, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
         {
             var shorthandedType = new Request.ScoringType { Name = "Shorthanded Goal" };
 

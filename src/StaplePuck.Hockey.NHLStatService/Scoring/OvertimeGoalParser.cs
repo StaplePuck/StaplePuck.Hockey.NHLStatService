@@ -11,7 +11,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
 {
     public class OvertimeGoalParser : ScoringParser
     {
-        public override void Parse(List<Request.PlayerStatsOnDate> list, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
+        public override void Parse(List<Request.PlayerStatsOnDate> list, ScoreDateResult.Game game, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
         {
             var overtimeGoalType = new Request.ScoringType { Name = "Overtime Goal" };
 
