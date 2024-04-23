@@ -12,7 +12,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
 {
     public class SaveParser : ScoringParser
     {
-        public override void Parse(List<PlayerStatsOnDate> list, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
+        public override void Parse(List<PlayerStatsOnDate> list, ScoreDateResult.Game game, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
         {
             var saveType = new ScoringType { Name = "Save" };
 
