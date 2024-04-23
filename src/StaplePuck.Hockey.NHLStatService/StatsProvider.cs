@@ -94,7 +94,7 @@ namespace StaplePuck.Hockey.NHLStatService
 
                 foreach (var parser in _parsers)
                 {
-                    parser.Parse(list, liveData, boxScoreData, gameSummary);
+                    parser.Parse(list, game, liveData, boxScoreData, gameSummary);
                 }
             }
 

@@ -5,7 +5,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
 {
     public class ThreeStarParser : ScoringParser
     {
-        public override void Parse(List<PlayerStatsOnDate> list, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
+        public override void Parse(List<PlayerStatsOnDate> list, ScoreDateResult.Game game, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
         {
             var firstStarType = new ScoringType { Name = "1st Star" };
             var secondStarType = new ScoringType { Name = "2nd Star" };

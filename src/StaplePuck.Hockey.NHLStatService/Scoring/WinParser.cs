@@ -11,7 +11,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
 {
     public class WinParser : ScoringParser
     {
-        public override void Parse(List<PlayerStatsOnDate> list, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
+        public override void Parse(List<PlayerStatsOnDate> list, ScoreDateResult.Game game, GameCenterResult gameCenter, BoxScoreResult boxScore, string summaryReport)
         {
             var winType = new Request.ScoringType { Name = "Win" };
             if (gameCenter.gameState != "OFF")

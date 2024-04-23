@@ -1,8 +1,10 @@
-﻿namespace StaplePuck.Hockey.NHLStatService.Scoring
+﻿using StaplePuck.Hockey.NHLStatService.Data;
+
+namespace StaplePuck.Hockey.NHLStatService.Scoring
 {
     public class AssistParser : ScoringParser
     {
-        public override void Parse(List<Request.PlayerStatsOnDate> list, Data.GameCenterResult gameCenter, Data.BoxScoreResult boxScore, string summaryReport)
+        public override void Parse(List<Request.PlayerStatsOnDate> list, ScoreDateResult.Game game, Data.GameCenterResult gameCenter, Data.BoxScoreResult boxScore, string summaryReport)
         {
             var assistType = new Request.ScoringType { Name = "Assist" };
 

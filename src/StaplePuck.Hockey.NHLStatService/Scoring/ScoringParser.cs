@@ -4,7 +4,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
 {
     public abstract class ScoringParser : IScoringParser
     {
-        public abstract void Parse(List<Request.PlayerStatsOnDate> list, Data.GameCenterResult gameCenter, Data.BoxScoreResult boxScore, string summaryReport);
+        public abstract void Parse(List<Request.PlayerStatsOnDate> list, ScoreDateResult.Game game, Data.GameCenterResult gameCenter, Data.BoxScoreResult boxScore, string summaryReport);
 
         protected Request.PlayerStatsOnDate GetPlayerStat(List<Request.PlayerStatsOnDate> list, string dateId, int playerId)
         {
