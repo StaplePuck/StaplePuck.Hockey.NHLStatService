@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using StaplePuck.Core;
+using StaplePuck.Hockey.NHLStatService.Data;
 using StaplePuck.Hockey.NHLStatService.Scoring;
 
 namespace StaplePuck.Hockey.NHLStatService
@@ -132,62 +133,124 @@ namespace StaplePuck.Hockey.NHLStatService
             return item;
         }
 
-        public async Task<List<Request.TeamStateForSeason>?> GetTeamsStatesAsync(string seasonId, bool isPlayoffs)
+        public async Task<List<Request.TeamStateForSeason>?> GetTeamsStatesAsync(string seasonId, string gameDate, bool isPlayoffs)
         {
+            // if playoffs get bracket
+            Dictionary<int, int> teams;
+
+            // https://api-web.nhle.com/v1/playoff-bracket/2024
             if (isPlayoffs)
             {
-                var url = string.Format("{0}/api/v1/tournaments/playoffs?expand=round.series&season={1}&site=en_nhl", _settings.StatsUrlRoot, seasonId);
-                var dateResult = await _client.GetAsync(url);
+                var playoffSeson = seasonId[^4..];
+                var braketUrl = $"{_settings.ApiUrlRoot}/v1/playoff-bracket/{playoffSeson}";
+                var bracketResult = await _client.GetAsync(braketUrl);
 
-                if (!dateResult.IsSuccessStatusCode)
+                if (!bracketResult.IsSuccessStatusCode)
                 {
                     return null;
                 }
 
-                var content = await dateResult.Content.ReadAsStringAsync();
-                var value = JsonConvert.DeserializeObject<Data.TournamentResult>(content);
-                if (value == null)
+                var bracketContent = await bracketResult.Content.ReadAsStringAsync();
+                var bracketValue = JsonConvert.DeserializeObject<Data.BracketResult>(bracketContent);
+                if (bracketValue == null)
                 {
                     return null;
                 }
-                var list = new List<Request.TeamStateForSeason>();
-                foreach (var item in GetTeamStates(value))
-                {
-                    var team = new Request.Team { ExternalId = item.Key };
-                    var season = new Request.Season { ExternalId = seasonId, IsPlayoffs = isPlayoffs };
-                    var teamState = new Request.TeamStateForSeason { Season = season, Team = team, GameState = item.Value };
-                    list.Add(teamState);
-                }
-                return list;
+
+                teams = GetTeamStates(bracketValue);
             }
             else
             {
-                var url = string.Format("{0}/api/v1/standings?hydrate=team(nextSchedule(team))&season={1}&site=en_nhl", _settings.StatsUrlRoot, seasonId);
-                var dateResult = await _client.GetAsync(url);
+                teams = new Dictionary<int, int>();
+                // todo...
+                // v1/standings/2024-04-20
+                //var url = string.Format("{0}/api/v1/standings?hydrate=team(nextSchedule(team))&season={1}&site=en_nhl", _settings.StatsUrlRoot, seasonId);
+                //var standingsResult = await _client.GetAsync(url);
 
-                if (!dateResult.IsSuccessStatusCode)
+                //if (!standingsResult.IsSuccessStatusCode)
+                //{
+                //    return null;
+                //}
+
+                //var standingsContent = await standingsResult.Content.ReadAsStringAsync();
+                //var standingsValue = JsonConvert.DeserializeObject<Data.StandingsResult>(standingsContent);
+
+                //foreach (var item in standingsValue!.standings)
+                //{
+                //    var team = new Request.Team { ExternalId = item. item!.team!.id };
+                //    var season = new Request.Season { ExternalId = seasonId, IsPlayoffs = isPlayoffs };
+                //    var gameState = 0;
+                //    var date = item.team?.nextSchedule?.dates?.FirstOrDefault();
+                //    if (date?.date != null && date.date.Value.IsToday() && date.games.Any(x => x.gameType == "P"))
+                //    {
+                //        gameState = 1;
+                //    }
+                //    var teamState = new Request.TeamStateForSeason { Season = season, Team = team, GameState = gameState };
+                //    list.Add(teamState);
+                //}
+                //return list;
+            }
+
+            // get game date data and update the playing today data
+            var url = $"{_settings.ApiUrlRoot}/v1/score/{gameDate}";
+            var dateResult = await _client.GetAsync(url);
+
+            if (!dateResult.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var content = await dateResult.Content.ReadAsStringAsync();
+            var value = JsonConvert.DeserializeObject<Data.ScoreDateResult>(content);
+            foreach (var item in value!.games)
+            {
+                UpdateTeam(teams, item.awayTeam.id, 1);
+                UpdateTeam(teams, item.homeTeam.id, 1);
+            }
+
+            var list = new List<Request.TeamStateForSeason>();
+            foreach (var item in teams)
+            {
+                var team = new Request.Team { ExternalId = item.Key };
+                var season = new Request.Season { ExternalId = seasonId, IsPlayoffs = isPlayoffs };
+                var teamState = new Request.TeamStateForSeason { Season = season, Team = team, GameState = item.Value };
+                list.Add(teamState);
+            }
+            return list;
+        }
+
+        public Dictionary<int, int> GetTeamStates(BracketResult result)
+        {
+            var teams = new Dictionary<int, int>();
+            foreach (var series in result.series)
+            {
+                if (series.winningTeamId > 0)
                 {
-                    return null;
+                    UpdateTeam(teams, series.winningTeamId, 0);
+                    UpdateTeam(teams, series.losingTeamId, -1);
                 }
-
-                var content = await dateResult.Content.ReadAsStringAsync();
-                var value = JsonConvert.DeserializeObject<Data.StandingsResult>(content);
-
-                var list = new List<Request.TeamStateForSeason>();
-                foreach (var item in value!.records!.SelectMany(x => x.teamRecords))
+                else
                 {
-                    var team = new Request.Team { ExternalId = item!.team!.id };
-                    var season = new Request.Season { ExternalId = seasonId, IsPlayoffs = isPlayoffs };
-                    var gameState = 0;
-                    var date = item.team?.nextSchedule?.dates?.FirstOrDefault();
-                    if (date?.date != null && date.date.Value.IsToday() && date.games.Any(x => x.gameType == "P"))
-                    {
-                        gameState = 1;
-                    }
-                    var teamState = new Request.TeamStateForSeason { Season = season, Team = team, GameState = gameState };
-                    list.Add(teamState);
+                    UpdateTeam(teams, series.topSeedTeam.id, 0);
+                    UpdateTeam(teams, series.bottomSeedTeam.id, 0);
                 }
-                return list;
+            }
+            return teams;
+        }
+
+        private void UpdateTeam(Dictionary<int, int> teams, int teamId, int teamState)
+        {
+            if (teamId == 0)
+            {
+                return;
+            }
+            if (teams.TryGetValue(teamId, out var existingState) && existingState > 0)
+            {
+                teams[teamId] = teamState;
+            }
+            else
+            {
+                teams[teamId] = teamState;
             }
         }
 
