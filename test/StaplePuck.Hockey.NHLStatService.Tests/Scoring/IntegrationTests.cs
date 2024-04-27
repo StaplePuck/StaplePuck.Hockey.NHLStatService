@@ -244,5 +244,47 @@ namespace StaplePuck.Hockey.NHLStatService.Tests.Scoring
                 Assert.Equal(1, x.Total);
             });
         }
+
+        [Fact]
+        public async Task TestPlayoffGamesNonClinching()
+        {
+            // arrange
+            var dateId = "2024-04-22";
+
+            // act
+            var result = await _statsProvider.GetScoresForDateAsync(dateId, true);
+
+            // assert
+            Assert.NotNull(result);
+
+            Assert.All(result, x => { Assert.Equal(dateId, x.GameDateId); });
+
+            // non series clinching goal
+            var nonScgPlayer = result.Single(x => x.Player.ExternalId == "8475188");
+            Assert.Collection(nonScgPlayer.PlayerScores, x =>
+            {
+                Assert.Equal("Game Winning Goal", x.ScoringType.Name);
+                Assert.Equal(1, x.Total);
+            }, x =>
+            {
+                Assert.Equal("Goal", x.ScoringType.Name);
+                Assert.Equal(1, x.Total);
+            }, x =>
+            {
+                Assert.Equal("1st Star", x.ScoringType.Name);
+                Assert.Equal(1, x.Total);
+            });
+            // goalie assist
+            var goalieAssit = result.Single(x => x.Player.ExternalId == "8479979");
+            Assert.Collection(goalieAssit.PlayerScores, x =>
+            {
+                Assert.Equal("Assist", x.ScoringType.Name);
+                Assert.Equal(1, x.Total);
+            }, x =>
+            {
+                Assert.Equal("Save", x.ScoringType.Name);
+                Assert.Equal(11, x.Total);
+            });
+        }
     }
 }
