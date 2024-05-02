@@ -11,6 +11,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{EFCE2270-1
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StaplePuck.Hockey.NHLStatService.Tests", "test\StaplePuck.Hockey.NHLStatService.Tests\StaplePuck.Hockey.NHLStatService.Tests.csproj", "{E7F26D88-AF5B-4648-81C8-742CDD241A5F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{DBC2F558-9E82-44F9-85CD-3502D37765C8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{29CB1915-88A5-450A-9FE2-ABB0D47F564F}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\beta.yml = .github\workflows\beta.yml
+		.github\workflows\feature.yml = .github\workflows\feature.yml
+		.github\workflows\prod.yml = .github\workflows\prod.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +41,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{A9D9CFF1-DCB6-40CC-8D3C-81041BE38FE1} = {612BE4A8-4CA3-4434-813C-B08C0A1F7B1F}
 		{E7F26D88-AF5B-4648-81C8-742CDD241A5F} = {EFCE2270-1B45-46C3-9B1A-B5A01B308C48}
+		{29CB1915-88A5-450A-9FE2-ABB0D47F564F} = {DBC2F558-9E82-44F9-85CD-3502D37765C8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {91FA9987-8E6B-469A-B82A-C2069130482D}

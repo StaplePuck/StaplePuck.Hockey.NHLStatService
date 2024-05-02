@@ -14,11 +14,11 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
         {
             var goalType = new Request.ScoringType { Name = "Goal" };
 
-            foreach (var player in this.GetAllPlayerStats(boxScore).Where(x => x.goals != 0))
+            foreach (var goal in gameCenter.summary.scoring.SelectMany(x => x.goals).Where(x => x.situationCode != "0101"))
             {
-                var data = this.GetPlayerStat(list, gameCenter.gameDate, player.playerId);
-                var saves = this.GetScoreItem(data, goalType);
-                saves.Total = player.goals;
+                var data = this.GetPlayerStat(list, gameCenter.gameDate, goal.playerId);
+                var goals = this.GetScoreItem(data, goalType);
+                goals.Total++;
             }
         }
     }

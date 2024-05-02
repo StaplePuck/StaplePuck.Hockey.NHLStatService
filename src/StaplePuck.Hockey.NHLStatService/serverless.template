@@ -1,7 +1,7 @@
 {
-  "AWSTemplateFormatVersion" : "2010-09-09",
-  "Transform" : "AWS::Serverless-2016-10-31",
-  "Description" : "The serverless application for the StaplePuck NHL Stat Service",
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Transform": "AWS::Serverless-2016-10-31",
+  "Description": "The serverless application for the StaplePuck NHL Stat Service",
   "Parameters": {
     "Auth0Audience": {
       "Type": "String"
@@ -25,9 +25,9 @@
       "Type": "String"
     }
   },
-  "Resources" : {
-    "NHLStatsFunction" : {
-      "Type" : "AWS::Serverless::Function",
+  "Resources": {
+    "NHLStatsFunction": {
+      "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "StaplePuck.Hockey.NHLStatService::StaplePuck.Hockey.NHLStatService.LambdaEntryPoint::ProcessMessage",
         "Runtime": "dotnet8",
@@ -49,6 +49,12 @@
           }
         }
       }
+    }
+  },
+  "Outputs": {
+    "NHLStatsFunctionArn": {
+      "Description": "The ARN for the NHL Stats Service",
+      "Value": { "Ref": "NHLStatsFunction" }
     }
   }
 }
