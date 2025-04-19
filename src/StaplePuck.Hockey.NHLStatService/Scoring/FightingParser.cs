@@ -13,7 +13,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
             {
                 var playerName = penality.committedByPlayer;
 
-                var playerId = GetPlayerId(playerName, penality.teamAbbrev, boxScore);
+                var playerId = GetPlayerId(playerName._default, penality.teamAbbrev._default, boxScore);
                 if (playerId == null)
                 {
                     // todo log warning

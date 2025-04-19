@@ -304,7 +304,7 @@ namespace StaplePuck.Hockey.NHLStatService
 
                     gameDate.GameDateSeasons.Add(gds);
                     
-                    _logger.LogInformation("Updating team date");
+                    _logger.LogInformation("Updating team data");
                     var result = _client.UpdateAsync("updateGameDateStats", gameDate).Result;
                     if (result == null)
                     {

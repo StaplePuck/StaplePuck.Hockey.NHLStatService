@@ -84,6 +84,7 @@ namespace StaplePuck.Hockey.NHLStatService.Data
 			public string shorthandedShotsAgainst { get; set; } = string.Empty;
 			public string saveShotsAgainst { get; set; } = string.Empty;
 			public string savePctg { get; set; } = string.Empty;
+            public string decision { get; set; } = string.Empty;
 			public int evenStrengthGoalsAgainst { get; set; }
 			public int powerPlayGoalsAgainst { get; set; }
 			public int shorthandedGoalsAgainst { get; set; }
