@@ -130,9 +130,9 @@ namespace StaplePuck.Hockey.NHLStatService.Data
         {
             public int sequence { get; set; }
             public int playerId { get; set; }
-            public string teamAbbrev { get; set; } = string.Empty;
-            public string firstName { get; set; } = string.Empty;
-            public string lastName { get; set; } = string.Empty;
+            public Name teamAbbrev { get; set; } = new Name();
+            public Name firstName { get; set; } = new Name();
+            public Name lastName { get; set; } = new Name();
             public string shotType { get; set; } = string.Empty;
             public string result { get; set; } = string.Empty;
             public string headshot { get; set; } = string.Empty;
@@ -144,7 +144,7 @@ namespace StaplePuck.Hockey.NHLStatService.Data
             public int playerId { get; set; }
             public string teamAbbrev { get; set; } = string.Empty;
             public string headshot { get; set; } = string.Empty;
-            public string name { get; set; } = string.Empty;
+            public Name name { get; set; } = new Name();
             public string firstName { get; set; } = string.Empty;
             public string lastName { get; set; } = string.Empty;
             public int sweaterNo { get; set; }
@@ -179,9 +179,9 @@ namespace StaplePuck.Hockey.NHLStatService.Data
             public string timeInPeriod { get; set; } = string.Empty;
             public string type { get; set; } = string.Empty;
             public int duration { get; set; }
-            public string committedByPlayer { get; set; } = string.Empty;
-            public string teamAbbrev { get; set; } = string.Empty;
-            public string drawnBy { get; set; } = string.Empty;
+            public Name committedByPlayer { get; set; } = new Name();
+            public Name teamAbbrev { get; set; } = new Name();
+            public Name drawnBy { get; set; } = new Name();
             public string descKey { get; set; } = string.Empty;
         }
 
