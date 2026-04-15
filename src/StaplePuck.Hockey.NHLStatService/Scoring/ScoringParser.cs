@@ -52,7 +52,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
             return playerStatsList;
         }
 
-        protected int? GetPlayerId(string name, string teamAbbrev, BoxScoreResult boxScoreResult)
+        protected int? GetPlayerId(int sweaterNumber, string teamAbbrev, BoxScoreResult boxScoreResult)
         {
             BoxScoreResult.TeamPlayers teamPlayers;
             if (boxScoreResult.awayTeam.abbrev == teamAbbrev)
@@ -73,11 +73,8 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
 
             // expected
             //J. Eriksson Ek
-            var split = name.Split(' ');
-            var firstName = split[0][0];
-            var lastName = split[split.Length - 1];
             var playerMatches = teamPlayers.defense.Union(teamPlayers.forwards).Union(teamPlayers.goalies)
-                .Where(x => x.name._default.StartsWith(firstName.ToString(), StringComparison.CurrentCultureIgnoreCase) && x.name._default.EndsWith(lastName, StringComparison.CurrentCultureIgnoreCase));
+                .Where(x => x.sweaterNumber == sweaterNumber);
             // toodo warn on more than one match
             if (!playerMatches.Any())
             {
