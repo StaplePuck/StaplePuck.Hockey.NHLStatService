@@ -15,7 +15,7 @@ namespace StaplePuck.Hockey.NHLStatService.Scoring
         {
             var shootoutGoalType = new Request.ScoringType { Name = "Shootout Goal" };
 
-            foreach (var goal in gameCenter.summary.shootout.Where(x => x.result == "goal")) 
+            foreach (var goal in gameCenter.summary.shootout.events.Where(x => x.result == "goal")) 
             {
                 var data = this.GetPlayerStat(list, gameCenter.gameDate, goal.playerId);
                 var saves = this.GetScoreItem(data, shootoutGoalType);

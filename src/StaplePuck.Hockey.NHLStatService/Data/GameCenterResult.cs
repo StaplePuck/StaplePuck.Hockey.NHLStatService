@@ -36,7 +36,7 @@ namespace StaplePuck.Hockey.NHLStatService.Data
         {
             public Linescore linescore { get; set; } = new Linescore();
             public Scoring[] scoring { get; set; } = new Scoring[0];
-            public Shootout[] shootout { get; set; } = new Shootout[0];
+            public Shootout shootout { get; set; } = new Shootout();
             public Threestar[] threeStars { get; set; } = new Threestar[0];
             public Teamgamestat[] teamGameStats { get; set; } = new Teamgamestat[0];
             public Shotsbyperiod[] shotsByPeriod { get; set; } = new Shotsbyperiod[0];
@@ -128,6 +128,12 @@ namespace StaplePuck.Hockey.NHLStatService.Data
 
         public class Shootout
         {
+            //public LiveScore liveScore { get; set; } = new LiveScore();
+            public ShootoutEvent[] events { get; set; } = new ShootoutEvent[0];
+        }
+
+        public class ShootoutEvent
+        {
             public int sequence { get; set; }
             public int playerId { get; set; }
             public Name teamAbbrev { get; set; } = new Name();
@@ -138,6 +144,7 @@ namespace StaplePuck.Hockey.NHLStatService.Data
             public string headshot { get; set; } = string.Empty;
             public bool gameWinner { get; set; }
         }
+
         public class Threestar
         {
             public int star { get; set; }
@@ -179,10 +186,17 @@ namespace StaplePuck.Hockey.NHLStatService.Data
             public string timeInPeriod { get; set; } = string.Empty;
             public string type { get; set; } = string.Empty;
             public int duration { get; set; }
-            public Name committedByPlayer { get; set; } = new Name();
+            public PenaltyPlayer committedByPlayer { get; set; } = new PenaltyPlayer();
             public Name teamAbbrev { get; set; } = new Name();
-            public Name drawnBy { get; set; } = new Name();
+            public PenaltyPlayer drawnBy { get; set; } = new PenaltyPlayer();
             public string descKey { get; set; } = string.Empty;
+        }
+
+        public class PenaltyPlayer
+        {
+            public Name firstName { get; set; } = new Name();
+            public Name lastName { get; set;} = new Name();
+            public int sweaterNumber { get; set; }
         }
 
         public class SeasonSeries
